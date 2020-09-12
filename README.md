@@ -49,7 +49,7 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 <!-- CONTACT -->
 ## Contact
 
-Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - email
+Bazif Rasool - [BazifRasool@twitter_handle](https://twitter.com/twitter_handle) - baziflaherwal@gmail
 
 Project Link: [https://github.com/Bazifrasool/RedditImageScraper]
 
