@@ -24,7 +24,7 @@ class RedditImageDownloader():
     self.driver = webdriver.Chrome(options=chrome_options)
     self.vars = {}
     self.subreddit=subreddit
-    
+
 #create a directory if not created, if created ,delete old and create new and cwd
     try:
         os.mkdir(path+self.subreddit)
@@ -33,38 +33,38 @@ class RedditImageDownloader():
         os.mkdir(path+self.subreddit)
     finally:
         os.chdir(path+self.subreddit)
-    
-  
+
+
   def teardown_method(self):
     self.driver.quit()
-    
-    
+
+
   def image_getter(self,link,i):
       #print(link)
       response = requests.get(link)
       file=None
       if("jpg" in link):
-          file = open(str(i)+".jpg", "wb")
+          file = open(self.subreddit+str(i)+".jpg", "wb")
       elif("png" in link):
-          file = open(str(i)+".png", "wb")
+          file = open(self.subreddit+str(i)+".png", "wb")
       file.write(response.content)
       file.close()
-  
-    
+
+
   def cleaner(self,imm_list):
     link_processed=[]
     for each in imm_list:
         pic_name = re.findall("[t][\/]([\S]*[.][\S][\S][g]).*",each)
         link_processed.append("https://i.redd.it/"+pic_name[0])
-    
+
     return(link_processed)
 
-  
+
   def download(self,speed):
     num_worker=speed/5
 
     self.driver.get("https://www.reddit.com/r/"+self.subreddit)
-    # 2 | setWindowSize | 848x1040 | 
+    # 2 | setWindowSize | 848x1040 |
     self.driver.set_window_size(848, 1040)
     # 3 | click | css=.i2sTp1duDdXdwoKi1l8ED |
     try:
@@ -72,14 +72,14 @@ class RedditImageDownloader():
     except:
        print("no prompt")
 
-   
+
 
 
       #Loop to Bottom
     current_pos=20
     new_pos=5
     attempts=4
-  
+
     time.sleep(2)
     i=0
     while(current_pos!=new_pos):
@@ -94,17 +94,17 @@ class RedditImageDownloader():
             time.sleep(1)
             current_pos=20
             new_pos=5
-  
-  
 
-    
-    
-   
+
+
+
+
+
     links=[]
     clean_links=[]
     try:
         link_elements =self.driver.find_elements_by_class_name("_13svhQIUZqD9PVzFcLwOKT")
-        
+
         for each in link_elements:
             links.append(each.get_attribute("href"))
 
@@ -117,8 +117,8 @@ class RedditImageDownloader():
         for each in link_elements:
             imm_links.append(each.get_attribute("src"))
 
-       
-                
+
+
         j=0
         while(j<len(imm_links)):
             if("external" in imm_links[j]):
@@ -126,34 +126,28 @@ class RedditImageDownloader():
                 j=0
             else:
                 j+=1
-                
+
         #print(links)
         clean_links = self.cleaner(imm_links)
 
     except:
         print("No internal Links found")
-    
+
 
     links.extend(clean_links)
 
-    
-    
-    
-    
+
+
+
+
 
     with ThreadPoolExecutor(max_workers=num_worker) as executor:
         for i,each in enumerate(links):
              executor.submit(self.image_getter,each,i)
     os.chdir("./..")
-    
-def download_helper(subreddit="wallpapers/",path="./",i_speed=100):            
+
+def download_helper(subreddit="wallpapers/",path="./",i_speed=100):
     st = RedditImageDownloader()
     st.setup_method(subreddit=subreddit,path=path)
     st.download(speed=i_speed)
     st.teardown_method()
-    
-    
-   
-    
-    
-    
