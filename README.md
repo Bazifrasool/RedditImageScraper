@@ -46,7 +46,7 @@ Just Clone the repositories and run the follwing commands.
 
 <!-- USAGE EXAMPLES -->
 ## Usage
-[![Product Name Screen Shot]
+[![Product Name Screen Shot]]
 
 
 <!-- CONTACT -->
