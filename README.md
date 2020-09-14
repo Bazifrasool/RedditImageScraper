@@ -46,7 +46,7 @@ Just Clone the repositories and run the follwing commands.
 
 <!-- USAGE EXAMPLES -->
 ## Usage
-[![Product Name Screen Shot]]
+[![Product Name Screen Shot][product-screenshot]]
 
 
 <!-- CONTACT -->
@@ -56,4 +56,4 @@ Bazif Rasool - [BazifRasool@twitter_handle](https://twitter.com/twitter_handle) 
 
 Project Link: [https://github.com/Bazifrasool/RedditImageScraper]
 
-[product-screenshot]: images/screenshot.png
+[product-screenshot]: static/Capture.PNG
