@@ -25,9 +25,10 @@
 
 
 
-Here's a blank template to get started:
-**To avoid retyping too much info. Do a search and replace with your text editor for the following:**
-`github_username`, `repo_name`, `twitter_handle`, `email`
+RedditImageScraper
+is an image scraping tool , to scrape images from subreddits which are jpeg or png.
+It has a browser based UI powered by Flask.
+Subbreddits can be a powerful source of obtaining object specific images, which can be used to train CNN's.
 
 
 
