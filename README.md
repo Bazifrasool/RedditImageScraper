@@ -35,9 +35,12 @@ Subbreddits can be a powerful source of obtaining object specific images, which 
 <!-- GETTING STARTED -->
 ## Getting Started
 
-Just Clone the repositories and run the follwing commands.
+Just Clone the repositories and run the follwing commands. 
+
 1.pip install -r requirements.txt```
+
 2.python3 run.py ```
+
 3.A browser window should open asking to enter required information
 
 
