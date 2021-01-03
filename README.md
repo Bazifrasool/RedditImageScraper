@@ -26,9 +26,9 @@
 
 
 RedditImageScraper
-is an image scraping tool , to scrape images from subreddits which are jpeg or png.
+is an image scraping tool based on selenium, to scrape images from subreddits which are jpeg or png.
 It has a browser based UI powered by Flask.
-Subbreddits can be a powerful source of obtaining object specific images, which can be used to train CNN's.
+
 
 
 
