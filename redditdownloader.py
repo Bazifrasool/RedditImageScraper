@@ -4,7 +4,6 @@ import re
 import shutil
 import time
 from concurrent.futures import ThreadPoolExecutor
-import logging
 import requests
 from selenium import webdriver
 from selenium.webdriver import ChromeOptions
@@ -25,7 +24,9 @@ class RedditImageDownloader():
 # create a directory if not created, if created ,delete old and create new and cwd
         try:
             os.mkdir(path+self.subreddit)
-        except:
+        except Exception as ex:
+            logging.exception("Fail makepath")
+            logging.exception(str(ex))
             shutil.rmtree(path+self.subreddit)
             os.mkdir(path+self.subreddit)
         finally:
@@ -64,6 +65,7 @@ class RedditImageDownloader():
             self.driver.find_element(
                 By.CSS_SELECTOR, ".i2sTp1duDdXdwoKi1l8ED").click()
         except Exception as ex:
+            logging.exception(str(ex))
             logging.exception("No Prompt")
 
         # Loop to Bottom
@@ -99,6 +101,7 @@ class RedditImageDownloader():
                 links.append(each.get_attribute("href"))
 
         except Exception as ex:
+            logging.exception(str(ex))
             logging.exception("No external Links found")
         try:
             link_elements = self.driver.find_elements_by_class_name(
@@ -119,6 +122,7 @@ class RedditImageDownloader():
             # print(links)
             clean_links = self.cleaner(imm_links)
         except Exception as ex:
+            logging.exception(str(ex))
             logging.exception("No internal Links found")
 
         links.extend(clean_links)
