@@ -26,8 +26,8 @@
 
 
 RedditImageScraper
-is an image scraping tool based on selenium, to scrape images from subreddits which are jpeg or png.
-It has a browser based UI powered by Flask.
+is an image scraping tool based on selenium, to scrape images from subreddits that are jpeg or png.
+It has a browser-based UI powered by Flask.
 
 
 
@@ -35,13 +35,13 @@ It has a browser based UI powered by Flask.
 <!-- GETTING STARTED -->
 ## Getting Started
 
-Just Clone the repositories and run the follwing commands. 
+Just Clone the repositories and run the following commands. 
 
 1.pip install -r requirements.txt
 
 2.python3 run.py 
 
-3.A browser window should open asking to enter required information
+3.A browser window should open asking to enter the required information
 
 
 <!-- USAGE EXAMPLES -->
