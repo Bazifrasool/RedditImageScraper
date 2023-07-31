@@ -4,144 +4,133 @@ import re
 import shutil
 import time
 from concurrent.futures import ThreadPoolExecutor
-
+import logging
 import requests
 from selenium import webdriver
 from selenium.webdriver import ChromeOptions
 from selenium.webdriver.common.by import By
+import logging
+LOG_FILENAME = 'DBG_LOG.txt'
+logging.basicConfig(filename=LOG_FILENAME, level=logging.DEBUG)
 
 
 class RedditImageDownloader():
-  def setup_method(self,subreddit="wallpapers/",path="./"):
-    chrome_options = ChromeOptions()
-    chrome_options.add_argument("--disable-notifications")
-    self.driver = webdriver.Chrome(options=chrome_options)
-    self.vars = {}
-    self.subreddit=subreddit
+    def setup_method(self, subreddit="wallpapers/", path="./"):
+        chrome_options = ChromeOptions()
+        chrome_options.add_argument("--disable-notifications")
+        self.driver = webdriver.Chrome(options=chrome_options)
+        self.vars = {}
+        self.subreddit = subreddit
 
-#create a directory if not created, if created ,delete old and create new and cwd
-    try:
-        os.mkdir(path+self.subreddit)
-    except:
-        shutil.rmtree(path+self.subreddit)
-        os.mkdir(path+self.subreddit)
-    finally:
-        os.chdir(path+self.subreddit)
+# create a directory if not created, if created ,delete old and create new and cwd
+        try:
+            os.mkdir(path+self.subreddit)
+        except:
+            shutil.rmtree(path+self.subreddit)
+            os.mkdir(path+self.subreddit)
+        finally:
+            os.chdir(path+self.subreddit)
 
+    def teardown_method(self):
+        self.driver.quit()
 
-  def teardown_method(self):
-    self.driver.quit()
+    def image_getter(self, link, i):
+        # print(link)
+        response = requests.get(link)
+        file = None
+        if ("jpg" in link):
+            file = open(self.subreddit+str(i)+".jpg", "wb")
+        elif ("png" in link):
+            file = open(self.subreddit+str(i)+".png", "wb")
+        file.write(response.content)
+        file.close()
 
+    def cleaner(self, imm_list):
+        link_processed = []
+        for each in imm_list:
+            pic_name = re.findall("[t][\/]([\S]*[.][\S][\S][g]).*", each)
+            link_processed.append("https://i.redd.it/"+pic_name[0])
 
-  def image_getter(self,link,i):
-      #print(link)
-      response = requests.get(link)
-      file=None
-      if("jpg" in link):
-          file = open(self.subreddit+str(i)+".jpg", "wb")
-      elif("png" in link):
-          file = open(self.subreddit+str(i)+".png", "wb")
-      file.write(response.content)
-      file.close()
+        return (link_processed)
 
+    def download(self, speed):
+        num_worker = speed/5
 
-  def cleaner(self,imm_list):
-    link_processed=[]
-    for each in imm_list:
-        pic_name = re.findall("[t][\/]([\S]*[.][\S][\S][g]).*",each)
-        link_processed.append("https://i.redd.it/"+pic_name[0])
+        self.driver.get("https://www.reddit.com/r/"+self.subreddit)
+        # 2 | setWindowSize | 848x1040 |
+        self.driver.set_window_size(848, 1040)
+        # 3 | click | css=.i2sTp1duDdXdwoKi1l8ED |
+        try:
+            self.driver.find_element(
+                By.CSS_SELECTOR, ".i2sTp1duDdXdwoKi1l8ED").click()
+        except Exception as ex:
+            logging.exception("No Prompt")
 
-    return(link_processed)
+        # Loop to Bottom
+        current_pos = 20
+        new_pos = 5
+        attempts = 4
 
-
-  def download(self,speed):
-    num_worker=speed/5
-
-    self.driver.get("https://www.reddit.com/r/"+self.subreddit)
-    # 2 | setWindowSize | 848x1040 |
-    self.driver.set_window_size(848, 1040)
-    # 3 | click | css=.i2sTp1duDdXdwoKi1l8ED |
-    try:
-        self.driver.find_element(By.CSS_SELECTOR, ".i2sTp1duDdXdwoKi1l8ED").click()
-    except:
-       print("no prompt")
-
-
-
-
-      #Loop to Bottom
-    current_pos=20
-    new_pos=5
-    attempts=4
-
-    time.sleep(2)
-    i=0
-    while(current_pos!=new_pos):
-        current_pos = self.driver.execute_script("return document.documentElement.scrollTop;")
-        self.driver.execute_script("window.scrollTo(0,document.body.scrollHeight);")
-        new_pos = self.driver.execute_script("return document.documentElement.scrollTop;")
-        time.sleep(1)
-        if(current_pos!=new_pos):
-            i=0
-        if(i<attempts and current_pos==new_pos):
-            i+=1
+        time.sleep(2)
+        i = 0
+        while (current_pos != new_pos):
+            current_pos = self.driver.execute_script(
+                "return document.documentElement.scrollTop;")
+            self.driver.execute_script(
+                "window.scrollTo(0,document.body.scrollHeight);")
+            new_pos = self.driver.execute_script(
+                "return document.documentElement.scrollTop;")
             time.sleep(1)
-            current_pos=20
-            new_pos=5
+            if (current_pos != new_pos):
+                i = 0
+            if (i < attempts and current_pos == new_pos):
+                i += 1
+                time.sleep(1)
+                current_pos = 20
+                new_pos = 5
+
+        links = []
+        clean_links = []
+        try:
+            link_elements = self.driver.find_elements_by_class_name(
+                "_13svhQIUZqD9PVzFcLwOKT")
+
+            for each in link_elements:
+                links.append(each.get_attribute("href"))
+
+        except Exception as ex:
+            logging.exception("No external Links found")
+        try:
+            link_elements = self.driver.find_elements_by_class_name(
+                "_2_tDEnGMLxpM6uOa2kaDB3")
+            imm_links = []
+            # print(imm_links)
+            for each in link_elements:
+                imm_links.append(each.get_attribute("src"))
+
+            j = 0
+            while (j < len(imm_links)):
+                if ("external" in imm_links[j]):
+                    imm_links.pop(j)
+                    j = 0
+                else:
+                    j += 1
+
+            # print(links)
+            clean_links = self.cleaner(imm_links)
+        except Exception as ex:
+            logging.exception("No internal Links found")
+
+        links.extend(clean_links)
+
+        with ThreadPoolExecutor(max_workers=num_worker) as executor:
+            for i, each in enumerate(links):
+                executor.submit(self.image_getter, each, i)
+        os.chdir("./..")
 
 
-
-
-
-
-    links=[]
-    clean_links=[]
-    try:
-        link_elements =self.driver.find_elements_by_class_name("_13svhQIUZqD9PVzFcLwOKT")
-
-        for each in link_elements:
-            links.append(each.get_attribute("href"))
-
-    except:
-        print("No external Links found")
-    try:
-        link_elements =self.driver.find_elements_by_class_name("_2_tDEnGMLxpM6uOa2kaDB3")
-        imm_links=[]
-        #print(imm_links)
-        for each in link_elements:
-            imm_links.append(each.get_attribute("src"))
-
-
-
-        j=0
-        while(j<len(imm_links)):
-            if("external" in imm_links[j]):
-                imm_links.pop(j)
-                j=0
-            else:
-                j+=1
-
-        #print(links)
-        clean_links = self.cleaner(imm_links)
-
-    except:
-        print("No internal Links found")
-
-
-    links.extend(clean_links)
-
-
-
-
-
-
-    with ThreadPoolExecutor(max_workers=num_worker) as executor:
-        for i,each in enumerate(links):
-             executor.submit(self.image_getter,each,i)
-    os.chdir("./..")
-
-def download_helper(subreddit="wallpapers/",path="./",i_speed=100):
+def download_helper(subreddit="wallpapers/", path="./", i_speed=100):
     st = RedditImageDownloader()
-    st.setup_method(subreddit=subreddit,path=path)
+    st.setup_method(subreddit=subreddit, path=path)
     st.download(speed=i_speed)
     st.teardown_method()
